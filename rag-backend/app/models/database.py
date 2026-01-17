@@ -1,11 +1,12 @@
 """SQLAlchemy database models and connection."""
 
-from sqlalchemy import Column, String, Text, DateTime, ForeignKey, func, Integer
-from sqlalchemy.dialects.postgresql import UUID, JSONB
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.orm import declarative_base, relationship
-from contextlib import asynccontextmanager
 import uuid
+from contextlib import asynccontextmanager
+
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import declarative_base, relationship
 
 from app.config import get_settings
 
@@ -67,6 +68,9 @@ def get_engine():
             db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
         elif db_url.startswith("postgresql://"):
             db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+        # asyncpg uses 'ssl' instead of 'sslmode'
+        db_url = db_url.replace("sslmode=require", "ssl=require")
 
         _engine = create_async_engine(
             db_url, echo=False, pool_pre_ping=True, pool_size=5, max_overflow=10

@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
 import {
   User,
   signInWithEmailAndPassword,
@@ -17,11 +23,16 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   signInWithEmail: (email: string, password: string) => Promise<void>;
-  signUpWithEmail: (email: string, password: string, displayName: string) => Promise<void>;
+  signUpWithEmail: (
+    email: string,
+    password: string,
+    displayName: string,
+  ) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   clearError: () => void;
+  getIdToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,7 +49,17 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-export function AuthProvider({ children }: AuthProviderProps): React.ReactElement {
+// Mock user for when Firebase is not configured
+const MOCK_USER = {
+  uid: "anonymous-user",
+  email: "anonymous@local.dev",
+  displayName: "Anonymous User",
+  getIdToken: async () => "mock-token",
+} as unknown as User;
+
+export function AuthProvider({
+  children,
+}: AuthProviderProps): React.ReactElement {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +69,9 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactElemen
     initializeFirebase();
 
     if (!auth) {
+      // Firebase not configured - use mock user for local development
+      console.log("Firebase not configured - using anonymous mode");
+      setUser(MOCK_USER);
       setLoading(false);
       return;
     }
@@ -62,7 +86,10 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactElemen
 
   const clearError = () => setError(null);
 
-  const signInWithEmail = async (email: string, password: string): Promise<void> => {
+  const signInWithEmail = async (
+    email: string,
+    password: string,
+  ): Promise<void> => {
     if (!auth) {
       setError("Authentication not initialized");
       return;
@@ -78,7 +105,11 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactElemen
     }
   };
 
-  const signUpWithEmail = async (email: string, password: string, displayName: string): Promise<void> => {
+  const signUpWithEmail = async (
+    email: string,
+    password: string,
+    displayName: string,
+  ): Promise<void> => {
     if (!auth) {
       setError("Authentication not initialized");
       return;
@@ -86,7 +117,11 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactElemen
 
     try {
       setError(null);
-      const result = await createUserWithEmailAndPassword(auth, email, password);
+      const result = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
 
       // Update display name
       if (result.user) {
@@ -148,6 +183,13 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactElemen
     }
   };
 
+  const getIdToken = async (): Promise<string | null> => {
+    if (user?.getIdToken) {
+      return await user.getIdToken();
+    }
+    return "mock-token";
+  };
+
   const value: AuthContextType = {
     user,
     loading,
@@ -158,6 +200,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactElemen
     signOut,
     resetPassword,
     clearError,
+    getIdToken,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

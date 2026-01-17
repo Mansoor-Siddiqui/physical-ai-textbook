@@ -155,10 +155,20 @@ class VectorService:
         """Get collection statistics."""
         try:
             info = self.client.get_collection(self.collection_name)
+            # Handle both old and new Qdrant API versions
+            vectors_count = getattr(info, "vectors_count", None)
+            if vectors_count is None:
+                vectors_count = getattr(info, "points_count", 0)
+            points_count = getattr(info, "points_count", vectors_count)
+            status = (
+                getattr(info.status, "value", str(info.status))
+                if info.status
+                else "unknown"
+            )
             return {
-                "vectors_count": info.vectors_count,
-                "points_count": info.points_count,
-                "status": info.status.value,
+                "vectors_count": vectors_count,
+                "points_count": points_count,
+                "status": status,
             }
         except Exception as e:
             print(f"Error getting collection info: {e}")
