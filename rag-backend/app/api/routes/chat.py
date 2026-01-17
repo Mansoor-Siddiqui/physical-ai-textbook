@@ -1,6 +1,7 @@
 """Chat API routes."""
 
 import json
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sse_starlette.sse import EventSourceResponse
@@ -11,11 +12,36 @@ from app.models.schemas import (
     ChatStreamChunk,
     SourceReference,
 )
+from app.services.auth_service import firebase_auth
 from app.services.chat_service import get_chat_service
 from app.services.history_service import get_history_service
-from app.services.auth_service import firebase_auth
 
 router = APIRouter(prefix="/chat", tags=["chat"])
+
+
+@router.post("/simple")
+async def simple_chat(request: ChatMessageRequest):
+    """Simple chat endpoint without history/database - for testing."""
+    chat_service = get_chat_service()
+
+    # Determine locale
+    locale = "ur" if request.page_context and "/ur/" in request.page_context else "en"
+    if request.locale:
+        locale = request.locale
+
+    # Generate RAG response without history
+    response_content, sources = await chat_service.generate_response(
+        message=request.message,
+        history=[],
+        selected_text=request.selected_text,
+        page_context=request.page_context,
+        locale=locale,
+    )
+
+    return {
+        "content": response_content,
+        "sources": sources,
+    }
 
 
 @router.post("", response_model=ChatMessageResponse)

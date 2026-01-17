@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef } from 'react';
-import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
-import { useAuth } from '@site/src/contexts/AuthContext';
+import { useState, useCallback, useRef } from "react";
+import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
+import { useAuth } from "@site/src/contexts/AuthContext";
 
 export interface Source {
   chapter: string;
@@ -12,7 +12,7 @@ export interface Source {
 
 export interface Message {
   id: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   sources?: Source[];
   selectedText?: string;
@@ -30,7 +30,8 @@ export interface ChatSession {
 
 export function useChat() {
   const { siteConfig } = useDocusaurusContext();
-  const API_URL = (siteConfig.customFields?.ragApiUrl as string) || 'http://localhost:8000';
+  const API_URL =
+    (siteConfig.customFields?.ragApiUrl as string) || "http://localhost:8000";
 
   const { user, getIdToken } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -45,7 +46,7 @@ export function useChat() {
     const token = await getIdToken();
     return {
       Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     };
   }, [user, getIdToken]);
 
@@ -58,7 +59,7 @@ export function useChat() {
         headers,
       });
 
-      if (!response.ok) throw new Error('Failed to load sessions');
+      if (!response.ok) throw new Error("Failed to load sessions");
 
       const data = await response.json();
       setSessions(
@@ -68,10 +69,10 @@ export function useChat() {
           createdAt: new Date(s.created_at),
           updatedAt: new Date(s.updated_at),
           messageCount: s.message_count,
-        }))
+        })),
       );
     } catch (err) {
-      console.error('Error loading sessions:', err);
+      console.error("Error loading sessions:", err);
     }
   }, [user, getAuthHeaders]);
 
@@ -84,10 +85,10 @@ export function useChat() {
         const headers = await getAuthHeaders();
         const response = await fetch(
           `${API_URL}/api/history/sessions/${sessionId}`,
-          { headers }
+          { headers },
         );
 
-        if (!response.ok) throw new Error('Failed to load messages');
+        if (!response.ok) throw new Error("Failed to load messages");
 
         const data = await response.json();
         setMessages(
@@ -98,24 +99,24 @@ export function useChat() {
             sources: m.sources,
             selectedText: m.selected_text,
             createdAt: new Date(m.created_at),
-          }))
+          })),
         );
         setCurrentSessionId(sessionId);
       } catch (err) {
-        console.error('Error loading messages:', err);
-        setError('Failed to load chat history');
+        console.error("Error loading messages:", err);
+        setError("Failed to load chat history");
       } finally {
         setIsLoading(false);
       }
     },
-    [user, getAuthHeaders]
+    [user, getAuthHeaders],
   );
 
   const sendMessage = useCallback(
     async (
       content: string,
       selectedText?: string,
-      pageContext?: string
+      pageContext?: string,
     ): Promise<void> => {
       if (!user || !content.trim()) return;
 
@@ -131,7 +132,7 @@ export function useChat() {
       // Add user message immediately
       const userMessage: Message = {
         id: `temp-${Date.now()}`,
-        role: 'user',
+        role: "user",
         content,
         selectedText,
         createdAt: new Date(),
@@ -141,8 +142,8 @@ export function useChat() {
       // Add placeholder for assistant message
       const assistantMessage: Message = {
         id: `temp-assistant-${Date.now()}`,
-        role: 'assistant',
-        content: '',
+        role: "assistant",
+        content: "",
         sources: [],
         createdAt: new Date(),
         isStreaming: true,
@@ -150,29 +151,52 @@ export function useChat() {
       setMessages((prev) => [...prev, assistantMessage]);
 
       try {
-        const headers = await getAuthHeaders();
-        const response = await fetch(`${API_URL}/api/chat/stream`, {
-          method: 'POST',
-          headers,
+        // Use simple endpoint (no auth required, no streaming)
+        const response = await fetch(`${API_URL}/api/chat/simple`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             message: content,
-            session_id: currentSessionId,
             selected_text: selectedText,
             page_context: pageContext,
+            locale: "en",
           }),
           signal: abortControllerRef.current.signal,
         });
 
         if (!response.ok) {
-          throw new Error('Failed to send message');
+          throw new Error("Failed to send message");
         }
 
+        const data = await response.json();
+
+        // Update the assistant message with the response
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.isStreaming
+              ? {
+                  ...m,
+                  id: `msg-${Date.now()}`,
+                  content: data.content,
+                  sources: data.sources,
+                  isStreaming: false,
+                }
+              : m,
+          ),
+        );
+
+        // Skip the streaming logic below
+        setIsLoading(false);
+        abortControllerRef.current = null;
+        return;
+
+        // Original streaming code (kept for future use)
         const reader = response.body?.getReader();
-        if (!reader) throw new Error('No response body');
+        if (!reader) throw new Error("No response body");
 
         const decoder = new TextDecoder();
-        let buffer = '';
-        let fullContent = '';
+        let buffer = "";
+        let fullContent = "";
         let sources: Source[] = [];
         let newSessionId = currentSessionId;
 
@@ -183,16 +207,16 @@ export function useChat() {
           buffer += decoder.decode(value, { stream: true });
 
           // Parse SSE events
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
 
           for (const line of lines) {
-            if (line.startsWith('event:')) {
+            if (line.startsWith("event:")) {
               const eventType = line.slice(6).trim();
               continue;
             }
 
-            if (line.startsWith('data:')) {
+            if (line.startsWith("data:")) {
               try {
                 const data = JSON.parse(line.slice(5).trim());
 
@@ -200,10 +224,8 @@ export function useChat() {
                   fullContent += data.content;
                   setMessages((prev) =>
                     prev.map((m) =>
-                      m.isStreaming
-                        ? { ...m, content: fullContent }
-                        : m
-                    )
+                      m.isStreaming ? { ...m, content: fullContent } : m,
+                    ),
                   );
                 }
 
@@ -226,8 +248,8 @@ export function useChat() {
                             sources,
                             isStreaming: false,
                           }
-                        : m
-                    )
+                        : m,
+                    ),
                   );
                   if (newSessionId && newSessionId !== currentSessionId) {
                     setCurrentSessionId(newSessionId);
@@ -245,12 +267,12 @@ export function useChat() {
           }
         }
       } catch (err: any) {
-        if (err.name === 'AbortError') {
+        if (err.name === "AbortError") {
           // User cancelled, remove streaming message
           setMessages((prev) => prev.filter((m) => !m.isStreaming));
         } else {
-          console.error('Chat error:', err);
-          setError(err.message || 'Failed to send message');
+          console.error("Chat error:", err);
+          setError(err.message || "Failed to send message");
           // Remove streaming message on error
           setMessages((prev) => prev.filter((m) => !m.isStreaming));
         }
@@ -259,7 +281,7 @@ export function useChat() {
         abortControllerRef.current = null;
       }
     },
-    [user, currentSessionId, getAuthHeaders, loadSessions]
+    [user, currentSessionId, getAuthHeaders, loadSessions],
   );
 
   const startNewChat = useCallback(() => {
@@ -277,23 +299,23 @@ export function useChat() {
         const response = await fetch(
           `${API_URL}/api/history/sessions/${sessionId}`,
           {
-            method: 'DELETE',
+            method: "DELETE",
             headers,
-          }
+          },
         );
 
-        if (!response.ok) throw new Error('Failed to delete session');
+        if (!response.ok) throw new Error("Failed to delete session");
 
         setSessions((prev) => prev.filter((s) => s.id !== sessionId));
         if (currentSessionId === sessionId) {
           startNewChat();
         }
       } catch (err) {
-        console.error('Error deleting session:', err);
-        setError('Failed to delete chat');
+        console.error("Error deleting session:", err);
+        setError("Failed to delete chat");
       }
     },
-    [user, currentSessionId, getAuthHeaders, startNewChat]
+    [user, currentSessionId, getAuthHeaders, startNewChat],
   );
 
   const cancelStream = useCallback(() => {

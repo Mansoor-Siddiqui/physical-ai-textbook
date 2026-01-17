@@ -1,9 +1,10 @@
 """Pydantic schemas for API request/response models."""
 
-from pydantic import BaseModel, Field
-from typing import Optional, List
 from datetime import datetime
+from typing import List, Optional
 from uuid import UUID
+
+from pydantic import BaseModel, Field
 
 
 # Chat Schemas
@@ -14,6 +15,7 @@ class ChatMessageRequest(BaseModel):
     session_id: Optional[str] = None
     selected_text: Optional[str] = None
     page_context: Optional[str] = None
+    locale: Optional[str] = "en"
 
 
 class SourceReference(BaseModel):
