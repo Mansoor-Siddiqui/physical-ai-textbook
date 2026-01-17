@@ -153,7 +153,9 @@ const config: Config = {
       messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
       appId: process.env.FIREBASE_APP_ID,
     },
-    ragApiUrl: process.env.RAG_API_URL || "http://localhost:8000",
+    ragApiUrl:
+      process.env.RAG_API_URL ||
+      "https://nedianmansoor-physical-ai-backend.hf.space",
   },
 
   onBrokenLinks: "throw",
