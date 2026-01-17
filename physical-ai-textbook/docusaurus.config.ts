@@ -15,8 +15,8 @@ const config: Config = {
     v4: true,
   },
 
-  url: "https://your-username.github.io",
-  baseUrl: "/",
+  url: "https://mansoor-siddiqui.github.io",
+  baseUrl: "/physical-ai-textbook/",
 
   // SEO metadata
   headTags: [
@@ -138,7 +138,7 @@ const config: Config = {
     },
   ],
 
-  organizationName: "your-username",
+  organizationName: "Mansoor-Siddiqui",
   projectName: "physical-ai-textbook",
   deploymentBranch: "gh-pages",
   trailingSlash: false,
@@ -188,7 +188,7 @@ const config: Config = {
         docs: {
           sidebarPath: "./sidebars.ts",
           editUrl:
-            "https://github.com/your-username/physical-ai-textbook/tree/main/",
+            "https://github.com/Mansoor-Siddiqui/physical-ai-textbook/tree/master/physical-ai-textbook/",
           showLastUpdateTime: false,
           showLastUpdateAuthor: false,
         },
@@ -209,7 +209,7 @@ const config: Config = {
         routeBasePath: "podcast",
         sidebarPath: "./sidebarsPodcast.ts",
         editUrl:
-          "https://github.com/your-username/physical-ai-textbook/tree/main/",
+          "https://github.com/Mansoor-Siddiqui/physical-ai-textbook/tree/master/physical-ai-textbook/",
         showLastUpdateTime: false,
         showLastUpdateAuthor: false,
       },
@@ -293,7 +293,7 @@ const config: Config = {
           position: "right",
         },
         {
-          href: "https://github.com/your-username/physical-ai-textbook",
+          href: "https://github.com/Mansoor-Siddiqui/physical-ai-textbook",
           label: "GitHub",
           position: "right",
         },
@@ -341,7 +341,7 @@ const config: Config = {
           items: [
             {
               label: "GitHub Discussions",
-              href: "https://github.com/your-username/physical-ai-textbook/discussions",
+              href: "https://github.com/Mansoor-Siddiqui/physical-ai-textbook/discussions",
             },
             {
               label: "ROS Discourse",
@@ -358,7 +358,7 @@ const config: Config = {
           items: [
             {
               label: "GitHub",
-              href: "https://github.com/your-username/physical-ai-textbook",
+              href: "https://github.com/Mansoor-Siddiqui/physical-ai-textbook",
             },
             {
               label: "ROS2 Documentation",
