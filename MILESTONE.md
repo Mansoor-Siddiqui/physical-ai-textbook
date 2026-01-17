@@ -1,8 +1,16 @@
 # Project Milestone: Physical AI Textbook
 
 **Date**: 2026-01-17
-**Status**: Git Committed - Ready to Push
-**Commit**: ef3c97f (160 files, 45179 insertions)
+**Status**: DEPLOYED - Frontend LIVE, Backend Ready to Deploy
+**Commit**: 7b0aacf
+
+## Deployment Status
+
+| Component | Platform | Status | URL |
+|-----------|----------|--------|-----|
+| Frontend | GitHub Pages | LIVE | https://mansoor-siddiqui.github.io/physical-ai-textbook/ |
+| Backend | Render.com | PENDING | See deployment instructions below |
+| GitHub Repo | GitHub | LIVE | https://github.com/Mansoor-Siddiqui/physical-ai-textbook |
 
 ## Current State Summary
 
@@ -18,8 +26,8 @@
 - [x] Custom 404 page
 - [x] Accessibility improvements
 - [x] Performance optimizations
-- [x] GitHub Actions workflow (`.github/workflows/deploy.yml`)
-- [x] Build passes for both locales
+- [x] GitHub Actions workflow
+- [x] **DEPLOYED to GitHub Pages**
 
 #### RAG Backend (FastAPI + Gemini)
 - [x] Migrated from OpenAI to Google Gemini
@@ -30,147 +38,141 @@
 - [x] Auth service: Firebase (optional)
 - [x] History service: Neon Postgres
 - [x] All endpoints working locally
+- [x] Dockerfile ready
+- [x] render.yaml Blueprint ready
 
-### Configuration Files Location
+## Backend Deployment Instructions (Render.com)
 
-| File | Purpose | Status |
-|------|---------|--------|
-| `rag-backend/.env` | API keys & credentials | ✅ Configured |
-| `physical-ai-textbook/.env` | Frontend env vars | ✅ Configured |
-| `.github/workflows/deploy.yml` | GitHub Pages deployment | ✅ Created |
-| `rag-backend/Dockerfile` | Railway deployment | ✅ Ready |
+### One-Click Deploy with Render Blueprint
 
-### External Services Configured
+1. Go to: https://render.com/deploy
+2. Click "New" > "Blueprint"
+3. Connect your GitHub account
+4. Select repository: `Mansoor-Siddiqui/physical-ai-textbook`
+5. Set root directory: `rag-backend`
+6. Add environment variables:
+
+```
+GEMINI_API_KEY=AIzaSyAQuH-w2bfMQjJVzh7eukxKJl5tQrtuB18
+QDRANT_URL=https://ce7be0b8-23f0-456c-aee9-a6774a57c077.europe-west3-0.gcp.cloud.qdrant.io
+QDRANT_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.fk_xaKI8F2dBdSIFyWKqLqcH0IgXg-tPo0R7s5M6a1c
+DATABASE_URL=postgresql://neondb_owner:npg_8XPU5OiSwstx@ep-quiet-forest-a5hinovzg-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require
+CORS_ORIGINS=https://mansoor-siddiqui.github.io,http://localhost:3000
+```
+
+7. Click "Apply"
+
+### Alternative: Manual Render Setup
+
+1. Go to https://dashboard.render.com
+2. New > Web Service
+3. Connect GitHub > Select `physical-ai-textbook`
+4. Settings:
+   - Name: `physical-ai-rag-backend`
+   - Root Directory: `rag-backend`
+   - Runtime: Python 3
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+5. Add environment variables (see above)
+6. Create Web Service
+
+### After Backend Deploys
+
+1. Copy your Render URL (e.g., `https://physical-ai-rag-backend.onrender.com`)
+2. Update frontend config if needed
+3. Test: `curl https://your-app.onrender.com/health`
+
+## External Services Configured
 
 | Service | Purpose | Status |
 |---------|---------|--------|
 | Google Gemini | AI (embeddings + chat) | ✅ API key set |
 | Qdrant Cloud | Vector database | ✅ 617 chunks indexed |
 | Neon Postgres | Chat history | ✅ Connection string set |
-| Firebase | Authentication | ⚠️ Optional (key format issue) |
-
-### API Keys in `.env`
-
-```
-GEMINI_API_KEY=AIzaSyAQuH-w2bfMQjJVzh7eukxKJl5tQrtuB18
-QDRANT_URL=https://ce7be0b8-23f0-456c-aee9-a6774a57c077.europe-west3-0.gcp.cloud.qdrant.io
-QDRANT_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-DATABASE_URL=postgresql://neondb_owner:npg_8XPU5OiSwstx@ep-quiet-forest-ahinovzg-pooler...
-```
-
-## Next Steps (Deployment)
-
-### Step 1: Create GitHub Repository
-```bash
-cd "C:\Agentic AI\Hackethon1_Book"
-git remote add origin https://github.com/YOUR_USERNAME/physical-ai-textbook.git
-git push -u origin master
-```
-
-### Step 2: Enable GitHub Pages
-1. Go to repo Settings > Pages
-2. Source: GitHub Actions
-3. Push triggers automatic deployment
-
-### Step 3: Deploy RAG Backend to Railway
-1. Go to https://railway.app
-2. New Project > Deploy from GitHub
-3. Select repository, set root to `rag-backend`
-4. Add environment variables from `.env`
-5. Deploy
-
-### Step 4: Update Frontend Config
-After Railway deployment, update:
-- `physical-ai-textbook/.env`: `RAG_API_URL=https://your-app.railway.app`
-- `rag-backend/.env`: `CORS_ORIGINS=https://your-username.github.io`
+| Firebase | Authentication | ⚠️ Optional (not configured) |
+| GitHub Pages | Frontend hosting | ✅ LIVE |
 
 ## Test Commands
 
-### Frontend
+### Frontend (Local)
 ```bash
 cd physical-ai-textbook
 npm run build  # Should pass
 npm run serve  # Test at localhost:3000
 ```
 
-### RAG Backend
+### RAG Backend (Local)
 ```bash
 cd rag-backend
+pip install -r requirements.txt
 python -m uvicorn app.main:app --reload --port 8000
-# Test: curl http://localhost:8000/health
-# Test: curl http://localhost:8000/api/stats
+
+# Test endpoints:
+curl http://localhost:8000/health
+curl http://localhost:8000/api/stats
 ```
 
-### Test Chat (Python)
-```python
-import asyncio
-from app.services.chat_service import get_chat_service
-
-async def test():
-    chat = get_chat_service()
-    response, sources = await chat.generate_response("What is ROS2?", [], locale="en")
-    print(response)
-
-asyncio.run(test())
+### Test Chat API
+```bash
+curl -X POST http://localhost:8000/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What is ROS2?", "session_id": "test", "locale": "en"}'
 ```
 
 ## File Structure
 
 ```
-Hackethon1_Book/
-├── .github/workflows/deploy.yml    # GitHub Pages CI/CD
-├── physical-ai-textbook/           # Docusaurus frontend
-│   ├── docs/                       # 6 chapters + resources
-│   ├── podcast/                    # 6 episodes + scripts
-│   ├── i18n/ur/                    # Urdu translations
-│   ├── src/components/             # React components
-│   └── build/                      # Production build
-├── rag-backend/                    # FastAPI backend
-│   ├── app/
-│   │   ├── services/               # Gemini, Qdrant, etc.
-│   │   ├── api/routes/             # Chat, search, history
-│   │   └── models/                 # Schemas, database
-│   ├── scripts/index_content.py   # Content indexer
-│   ├── Dockerfile                  # Railway deployment
-│   └── .env                        # API keys (DO NOT COMMIT)
-├── specs/physical-ai-textbook/     # SDD artifacts
-│   ├── spec.md
-│   ├── plan.md
-│   └── tasks.md
-└── history/prompts/                # PHR records
+physical-ai-textbook/
+├── .github/workflows/
+│   ├── deploy.yml              # GitHub Pages deployment
+│   └── deploy-backend.yml      # Render deploy hook
+├── physical-ai-textbook/       # Docusaurus frontend
+│   ├── docs/                   # 6 chapters + resources
+│   ├── podcast/                # 6 episodes + scripts
+│   ├── i18n/ur/                # Urdu translations
+│   └── src/components/         # React components
+├── rag-backend/                # FastAPI backend
+│   ├── app/services/           # Gemini, Qdrant, etc.
+│   ├── Dockerfile              # Container deployment
+│   ├── render.yaml             # Render Blueprint
+│   ├── railway.toml            # Railway config
+│   └── requirements.txt        # Python dependencies
+├── MILESTONE.md                # This file
+└── history/prompts/            # PHR records
 ```
 
 ## Resume Instructions
 
-If session ends, run these commands to verify state:
+If session ends, check deployment status:
 
 ```bash
-# 1. Check frontend builds
-cd "C:\Agentic AI\Hackethon1_Book\physical-ai-textbook"
-npm run build
+# 1. Frontend should be live at:
+# https://mansoor-siddiqui.github.io/physical-ai-textbook/
 
-# 2. Check RAG backend works
-cd "C:\Agentic AI\Hackethon1_Book\rag-backend"
-python -c "
-import asyncio
-from app.services.vector_service import get_vector_service
-async def test():
-    vs = get_vector_service()
-    info = await vs.get_collection_info()
-    print(f'Vectors: {info}')
-asyncio.run(test())
-"
+# 2. Check GitHub Actions status:
+# https://github.com/Mansoor-Siddiqui/physical-ai-textbook/actions
 
-# 3. If vectors missing, re-index:
+# 3. If backend not deployed, follow Render instructions above
+
+# 4. Re-index content if needed:
+cd rag-backend
 python scripts/index_content.py --recreate
 ```
 
 ## Known Issues
 
-1. **Firebase PEM key**: Private key format issue in .env - auth disabled for now
-2. **Gemini rate limits**: Use gemini-2.5-flash model, has better quota
-3. **Qdrant API**: Using `query_points()` not deprecated `search()`
+1. **Firebase PEM key**: Private key format issue - auth disabled for now
+2. **Gemini rate limits**: Using gemini-2.5-flash model for better quota
+3. **Backend hosting**: Needs manual Render.com setup (one-time)
+
+## Quick Links
+
+- **Live Site**: https://mansoor-siddiqui.github.io/physical-ai-textbook/
+- **GitHub Repo**: https://github.com/Mansoor-Siddiqui/physical-ai-textbook
+- **Render Dashboard**: https://dashboard.render.com
+- **Qdrant Cloud**: https://cloud.qdrant.io
+- **Neon Console**: https://console.neon.tech
 
 ---
 **Last Updated**: 2026-01-17
-**PHR**: history/prompts/physical-ai-textbook/005-migrate-openai-to-gemini.green.prompt.md
+**Session**: Phase 7 Complete + Gemini Migration + GitHub Deployment
