@@ -9,6 +9,7 @@ export default function ResetPasswordPage(): React.ReactElement {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const { resetPassword, error, clearError } = useAuth();
+  const loginUrl = useBaseUrl("/auth/login");
 
   const handleResetPassword = async (e: FormEvent) => {
     e.preventDefault();
@@ -84,7 +85,7 @@ export default function ResetPasswordPage(): React.ReactElement {
         </form>
 
         <div className={styles.links}>
-          <a href={useBaseUrl("/auth/login")} className={styles.link}>
+          <a href={loginUrl} className={styles.link}>
             <Translate id="auth.reset.backToLogin">Back to Sign In</Translate>
           </a>
         </div>

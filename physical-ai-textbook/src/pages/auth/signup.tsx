@@ -14,6 +14,7 @@ export default function SignupPage(): React.ReactElement {
   const [validationError, setValidationError] = useState<string | null>(null);
   const { signUpWithEmail, signInWithGoogle, error, clearError } = useAuth();
   const history = useHistory();
+  const loginUrl = useBaseUrl("/auth/login");
 
   const handleSignUp = async (e: FormEvent) => {
     e.preventDefault();
@@ -210,7 +211,7 @@ export default function SignupPage(): React.ReactElement {
             <Translate id="auth.signup.hasAccount">
               Already have an account?
             </Translate>{" "}
-            <a href={useBaseUrl("/auth/login")} className={styles.link}>
+            <a href={loginUrl} className={styles.link}>
               <Translate id="auth.signup.signInLink">Sign in</Translate>
             </a>
           </span>

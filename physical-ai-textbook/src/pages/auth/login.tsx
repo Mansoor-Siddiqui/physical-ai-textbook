@@ -12,6 +12,8 @@ export default function LoginPage(): React.ReactElement {
   const { signInWithEmail, signInWithGoogle, error, clearError } = useAuth();
   const history = useHistory();
   const location = useLocation();
+  const resetPasswordUrl = useBaseUrl("/auth/reset-password");
+  const signupUrl = useBaseUrl("/auth/signup");
 
   // Get return URL from query params
   const searchParams = new URLSearchParams(location.search);
@@ -135,7 +137,7 @@ export default function LoginPage(): React.ReactElement {
               disabled={isLoading}
             />
             <a
-              href={useBaseUrl("/auth/reset-password")}
+              href={resetPasswordUrl}
               className={`${styles.link} ${styles.forgotPassword}`}
             >
               <Translate id="auth.login.forgotPassword">
@@ -162,7 +164,7 @@ export default function LoginPage(): React.ReactElement {
             <Translate id="auth.login.noAccount">
               Don't have an account?
             </Translate>{" "}
-            <a href={useBaseUrl("/auth/signup")} className={styles.link}>
+            <a href={signupUrl} className={styles.link}>
               <Translate id="auth.login.signUpLink">Sign up</Translate>
             </a>
           </span>

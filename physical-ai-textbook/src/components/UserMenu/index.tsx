@@ -10,6 +10,7 @@ export default function UserMenu(): React.ReactElement {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const history = useHistory();
+  const loginUrl = useBaseUrl("/auth/login");
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -51,7 +52,7 @@ export default function UserMenu(): React.ReactElement {
   if (!user) {
     return (
       <div className={styles.container}>
-        <a href={useBaseUrl("/auth/login")} className={styles.signInButton}>
+        <a href={loginUrl} className={styles.signInButton}>
           <Translate id="navbar.signIn">Sign In</Translate>
         </a>
       </div>
