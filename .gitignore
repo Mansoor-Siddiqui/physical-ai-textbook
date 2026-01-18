@@ -43,9 +43,10 @@ coverage/
 .cache/
 
 # Audio files (use Git LFS if needed)
-*.mp3
 *.wav
 *.ogg
+# Allow podcast audio files
+!physical-ai-textbook/static/audio/**/*.mp3
 
 # Large model files
 *.bin
