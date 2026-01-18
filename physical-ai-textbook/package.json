@@ -24,6 +24,7 @@
     "@docusaurus/plugin-content-docs": "3.9.2",
     "@docusaurus/preset-classic": "3.9.2",
     "@mdx-js/react": "^3.0.0",
+    "@supabase/supabase-js": "^2.90.1",
     "clsx": "^2.0.0",
     "dotenv": "^17.2.3",
     "firebase": "^12.7.0",

@@ -5,21 +5,12 @@ import React, {
   useState,
   ReactNode,
 } from "react";
-import {
-  User,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-  GoogleAuthProvider,
-  signInWithPopup,
-  sendPasswordResetEmail,
-  updateProfile,
-} from "firebase/auth";
-import { auth, initializeFirebase } from "../lib/firebase";
+import { User, Session } from "@supabase/supabase-js";
+import { supabase } from "../lib/supabase";
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   loading: boolean;
   error: string | null;
   signInWithEmail: (email: string, password: string) => Promise<void>;
@@ -49,39 +40,32 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Mock user for when Firebase is not configured
-const MOCK_USER = {
-  uid: "anonymous-user",
-  email: "anonymous@local.dev",
-  displayName: "Anonymous User",
-  getIdToken: async () => "mock-token",
-} as unknown as User;
-
 export function AuthProvider({
   children,
 }: AuthProviderProps): React.ReactElement {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Initialize Firebase on mount
-    initializeFirebase();
-
-    if (!auth) {
-      // Firebase not configured - use mock user for local development
-      console.log("Firebase not configured - using anonymous mode");
-      setUser(MOCK_USER);
-      setLoading(false);
-      return;
-    }
-
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const clearError = () => setError(null);
@@ -90,16 +74,15 @@ export function AuthProvider({
     email: string,
     password: string,
   ): Promise<void> => {
-    if (!auth) {
-      setError("Authentication not initialized");
-      return;
-    }
-
     try {
       setError(null);
-      await signInWithEmailAndPassword(auth, email, password);
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
     } catch (err: any) {
-      const message = getErrorMessage(err.code);
+      const message = getErrorMessage(err.message);
       setError(message);
       throw err;
     }
@@ -110,88 +93,76 @@ export function AuthProvider({
     password: string,
     displayName: string,
   ): Promise<void> => {
-    if (!auth) {
-      setError("Authentication not initialized");
-      return;
-    }
-
     try {
       setError(null);
-      const result = await createUserWithEmailAndPassword(
-        auth,
+      const { error } = await supabase.auth.signUp({
         email,
         password,
-      );
-
-      // Update display name
-      if (result.user) {
-        await updateProfile(result.user, { displayName });
-      }
+        options: {
+          data: {
+            display_name: displayName,
+            full_name: displayName,
+          },
+        },
+      });
+      if (error) throw error;
     } catch (err: any) {
-      const message = getErrorMessage(err.code);
+      const message = getErrorMessage(err.message);
       setError(message);
       throw err;
     }
   };
 
   const signInWithGoogle = async (): Promise<void> => {
-    if (!auth) {
-      setError("Authentication not initialized");
-      return;
-    }
-
     try {
       setError(null);
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin + "/physical-ai-textbook/",
+        },
+      });
+      if (error) throw error;
     } catch (err: any) {
-      const message = getErrorMessage(err.code);
+      const message = getErrorMessage(err.message);
       setError(message);
       throw err;
     }
   };
 
   const signOut = async (): Promise<void> => {
-    if (!auth) {
-      setError("Authentication not initialized");
-      return;
-    }
-
     try {
       setError(null);
-      await firebaseSignOut(auth);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
     } catch (err: any) {
-      const message = getErrorMessage(err.code);
+      const message = getErrorMessage(err.message);
       setError(message);
       throw err;
     }
   };
 
   const resetPassword = async (email: string): Promise<void> => {
-    if (!auth) {
-      setError("Authentication not initialized");
-      return;
-    }
-
     try {
       setError(null);
-      await sendPasswordResetEmail(auth, email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + "/physical-ai-textbook/auth/login",
+      });
+      if (error) throw error;
     } catch (err: any) {
-      const message = getErrorMessage(err.code);
+      const message = getErrorMessage(err.message);
       setError(message);
       throw err;
     }
   };
 
   const getIdToken = async (): Promise<string | null> => {
-    if (user?.getIdToken) {
-      return await user.getIdToken();
-    }
-    return "mock-token";
+    return session?.access_token ?? null;
   };
 
   const value: AuthContextType = {
     user,
+    session,
     loading,
     error,
     signInWithEmail,
@@ -207,33 +178,26 @@ export function AuthProvider({
 }
 
 // Helper function to get user-friendly error messages
-function getErrorMessage(errorCode: string): string {
-  switch (errorCode) {
-    case "auth/email-already-in-use":
-      return "This email is already registered. Please sign in instead.";
-    case "auth/invalid-email":
-      return "Invalid email address format.";
-    case "auth/operation-not-allowed":
-      return "This sign-in method is not enabled.";
-    case "auth/weak-password":
-      return "Password is too weak. Please use at least 6 characters.";
-    case "auth/user-disabled":
-      return "This account has been disabled.";
-    case "auth/user-not-found":
-      return "No account found with this email.";
-    case "auth/wrong-password":
-      return "Incorrect password.";
-    case "auth/invalid-credential":
-      return "Invalid email or password.";
-    case "auth/too-many-requests":
-      return "Too many failed attempts. Please try again later.";
-    case "auth/popup-closed-by-user":
-      return "Sign-in popup was closed. Please try again.";
-    case "auth/network-request-failed":
-      return "Network error. Please check your connection.";
-    default:
-      return "An error occurred. Please try again.";
+function getErrorMessage(errorMessage: string): string {
+  if (errorMessage.includes("Invalid login credentials")) {
+    return "Invalid email or password.";
   }
+  if (errorMessage.includes("Email not confirmed")) {
+    return "Please check your email and confirm your account.";
+  }
+  if (errorMessage.includes("User already registered")) {
+    return "This email is already registered. Please sign in instead.";
+  }
+  if (errorMessage.includes("Password should be")) {
+    return "Password must be at least 6 characters.";
+  }
+  if (errorMessage.includes("Unable to validate email")) {
+    return "Invalid email address format.";
+  }
+  if (errorMessage.includes("rate limit")) {
+    return "Too many attempts. Please try again later.";
+  }
+  return errorMessage || "An error occurred. Please try again.";
 }
 
 export default AuthContext;

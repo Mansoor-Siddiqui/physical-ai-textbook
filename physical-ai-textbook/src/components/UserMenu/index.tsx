@@ -77,15 +77,23 @@ export default function UserMenu(): React.ReactElement {
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        {user.photoURL ? (
+        {user.user_metadata?.avatar_url ? (
           <img
-            src={user.photoURL}
-            alt={user.displayName || "User"}
+            src={user.user_metadata.avatar_url}
+            alt={
+              user.user_metadata?.display_name ||
+              user.user_metadata?.full_name ||
+              "User"
+            }
             className={styles.avatar}
           />
         ) : (
           <div className={styles.avatarFallback}>
-            {getInitials(user.displayName)}
+            {getInitials(
+              user.user_metadata?.display_name ||
+                user.user_metadata?.full_name ||
+                user.email,
+            )}
           </div>
         )}
         <svg
@@ -102,7 +110,9 @@ export default function UserMenu(): React.ReactElement {
         <div className={styles.dropdown}>
           <div className={styles.userInfo}>
             <span className={styles.userName}>
-              {user.displayName || "User"}
+              {user.user_metadata?.display_name ||
+                user.user_metadata?.full_name ||
+                "User"}
             </span>
             <span className={styles.userEmail}>{user.email}</span>
           </div>
