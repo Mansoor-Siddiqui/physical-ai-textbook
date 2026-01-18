@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from '@docusaurus/router';
-import Link from '@docusaurus/Link';
-import Translate from '@docusaurus/Translate';
-import { useAuth } from '@site/src/contexts/AuthContext';
-import { useChat, ChatSession } from './hooks/useChat';
-import { useTextSelection } from './hooks/useTextSelection';
-import ChatMessage from './ChatMessage';
-import ChatInput from './ChatInput';
-import styles from './styles.module.css';
+import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "@docusaurus/router";
+import Link from "@docusaurus/Link";
+import Translate from "@docusaurus/Translate";
+import { useAuth } from "@site/src/contexts/AuthContext";
+import { useChat, ChatSession } from "./hooks/useChat";
+import { useTextSelection } from "./hooks/useTextSelection";
+import ChatMessage from "./ChatMessage";
+import ChatInput from "./ChatInput";
+import styles from "./styles.module.css";
 
 export default function ChatWidget() {
   const { user, loading: authLoading } = useAuth();
@@ -26,16 +26,14 @@ export default function ChatWidget() {
     clearError,
   } = useChat();
 
-  const {
-    selectedText,
-    selectionRect,
-    hasSelection,
-    clearSelection,
-  } = useTextSelection();
+  const { selectedText, selectionRect, hasSelection, clearSelection } =
+    useTextSelection();
 
   const [isOpen, setIsOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const [pendingSelectedText, setPendingSelectedText] = useState<string | null>(null);
+  const [pendingSelectedText, setPendingSelectedText] = useState<string | null>(
+    null,
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Get current page context
@@ -50,7 +48,7 @@ export default function ChatWidget() {
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const handleToggle = () => {
@@ -87,19 +85,19 @@ export default function ChatWidget() {
     const diff = now.getTime() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-    if (days === 0) return 'Today';
-    if (days === 1) return 'Yesterday';
+    if (days === 0) return "Today";
+    if (days === 1) return "Yesterday";
     if (days < 7) return `${days} days ago`;
     return date.toLocaleDateString();
   };
 
   // Don't render during SSR
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return null;
   }
 
   // Don't show on auth pages
-  if (location.pathname.startsWith('/auth')) {
+  if (location.pathname.startsWith("/auth")) {
     return null;
   }
 
@@ -112,7 +110,7 @@ export default function ChatWidget() {
           style={{
             top: selectionRect.bottom + window.scrollY + 8,
             left: selectionRect.left + selectionRect.width / 2,
-            transform: 'translateX(-50%)',
+            transform: "translateX(-50%)",
           }}
           onClick={handleAskAboutSelection}
         >
@@ -171,7 +169,9 @@ export default function ChatWidget() {
                 {sessions.length === 0 ? (
                   <div className={styles.welcomeMessage}>
                     <p className={styles.welcomeText}>
-                      <Translate id="chat.noHistory">No chat history yet</Translate>
+                      <Translate id="chat.noHistory">
+                        No chat history yet
+                      </Translate>
                     </p>
                   </div>
                 ) : (
@@ -186,7 +186,8 @@ export default function ChatWidget() {
                           {session.title}
                         </div>
                         <div className={styles.historyItemMeta}>
-                          {formatDate(session.updatedAt)} · {session.messageCount} messages
+                          {formatDate(session.updatedAt)} ·{" "}
+                          {session.messageCount} messages
                         </div>
                       </div>
                       <button
@@ -207,68 +208,55 @@ export default function ChatWidget() {
           )}
 
           {/* Main Content */}
-          {!authLoading && !user ? (
-            <div className={styles.loginPrompt}>
-              <p className={styles.loginPromptText}>
-                <Translate id="chat.loginRequired">
-                  Please sign in to use the AI assistant
-                </Translate>
-              </p>
-              <Link to="/auth/login" className={styles.loginButton}>
-                <Translate id="chat.signIn">Sign In</Translate>
-              </Link>
-            </div>
-          ) : (
-            <>
-              {/* Messages */}
-              <div className={styles.messagesContainer}>
-                {messages.length === 0 ? (
-                  <div className={styles.welcomeMessage}>
-                    <div className={styles.welcomeIcon}>📚</div>
-                    <div className={styles.welcomeTitle}>
-                      <Translate id="chat.welcome.title">
-                        Welcome to the AI Assistant
-                      </Translate>
-                    </div>
-                    <p className={styles.welcomeText}>
-                      <Translate id="chat.welcome.text">
-                        Ask me anything about the Physical AI Textbook! You can also
-                        select text on any page and ask about it.
-                      </Translate>
-                    </p>
+          <>
+            {/* Messages */}
+            <div className={styles.messagesContainer}>
+              {messages.length === 0 ? (
+                <div className={styles.welcomeMessage}>
+                  <div className={styles.welcomeIcon}>📚</div>
+                  <div className={styles.welcomeTitle}>
+                    <Translate id="chat.welcome.title">
+                      Welcome to the AI Assistant
+                    </Translate>
                   </div>
-                ) : (
-                  messages.map((message) => (
-                    <ChatMessage key={message.id} message={message} />
-                  ))
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Error Message */}
-              {error && (
-                <div className={styles.errorMessage}>
-                  <span>{error}</span>
-                  <button className={styles.errorDismiss} onClick={clearError}>
-                    ✕
-                  </button>
+                  <p className={styles.welcomeText}>
+                    <Translate id="chat.welcome.text">
+                      Ask me anything about the Physical AI Textbook! You can
+                      also select text on any page and ask about it.
+                    </Translate>
+                  </p>
                 </div>
+              ) : (
+                messages.map((message) => (
+                  <ChatMessage key={message.id} message={message} />
+                ))
               )}
+              <div ref={messagesEndRef} />
+            </div>
 
-              {/* Input */}
-              <ChatInput
-                onSend={handleSendMessage}
-                disabled={isLoading}
-                selectedText={pendingSelectedText || undefined}
-                onClearSelection={() => setPendingSelectedText(null)}
-                placeholder={
-                  pendingSelectedText
-                    ? 'Ask about the selected text...'
-                    : 'Ask a question...'
-                }
-              />
-            </>
-          )}
+            {/* Error Message */}
+            {error && (
+              <div className={styles.errorMessage}>
+                <span>{error}</span>
+                <button className={styles.errorDismiss} onClick={clearError}>
+                  ✕
+                </button>
+              </div>
+            )}
+
+            {/* Input */}
+            <ChatInput
+              onSend={handleSendMessage}
+              disabled={isLoading}
+              selectedText={pendingSelectedText || undefined}
+              onClearSelection={() => setPendingSelectedText(null)}
+              placeholder={
+                pendingSelectedText
+                  ? "Ask about the selected text..."
+                  : "Ask a question..."
+              }
+            />
+          </>
         </div>
       ) : (
         <button

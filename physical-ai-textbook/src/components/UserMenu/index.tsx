@@ -48,15 +48,9 @@ export default function UserMenu(): React.ReactElement {
     );
   }
 
-  // Show sign in button if not authenticated
+  // Hide sign in button - auth not configured in production
   if (!user) {
-    return (
-      <div className={styles.container}>
-        <a href={loginUrl} className={styles.signInButton}>
-          <Translate id="navbar.signIn">Sign In</Translate>
-        </a>
-      </div>
-    );
+    return null;
   }
 
   // Get user initials for avatar fallback
