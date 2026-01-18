@@ -38,34 +38,44 @@ function HomepageHeader() {
           </Translate>
         </p>
         <div className={styles.buttons}>
-          <Link
-            className={clsx("button button--lg", styles.primaryButton)}
-            to="/docs/intro"
-            onClick={(e) =>
-              handleProtectedClick(e, "/physical-ai-textbook/docs/intro")
-            }
-          >
-            <Translate
-              id="homepage.startLearning"
-              description="Start learning button"
+          {user ? (
+            <>
+              <Link
+                className={clsx("button button--lg", styles.primaryButton)}
+                to="/docs/intro"
+              >
+                <Translate
+                  id="homepage.startLearning"
+                  description="Start learning button"
+                >
+                  Start Learning
+                </Translate>
+              </Link>
+              <Link
+                className={clsx("button button--lg", styles.secondaryButton)}
+                to="/podcast"
+              >
+                <Translate
+                  id="homepage.listenPodcast"
+                  description="Listen to podcast button"
+                >
+                  Listen to Podcast
+                </Translate>
+              </Link>
+            </>
+          ) : (
+            <Link
+              className={clsx("button button--lg", styles.primaryButton)}
+              to={loginUrl}
             >
-              Start Learning
-            </Translate>
-          </Link>
-          <Link
-            className={clsx("button button--lg", styles.secondaryButton)}
-            to="/podcast"
-            onClick={(e) =>
-              handleProtectedClick(e, "/physical-ai-textbook/podcast")
-            }
-          >
-            <Translate
-              id="homepage.listenPodcast"
-              description="Listen to podcast button"
-            >
-              Listen to Podcast
-            </Translate>
-          </Link>
+              <Translate
+                id="homepage.signInToStart"
+                description="Sign in to start learning button"
+              >
+                Sign In to Start Learning
+              </Translate>
+            </Link>
+          )}
         </div>
       </div>
     </header>
