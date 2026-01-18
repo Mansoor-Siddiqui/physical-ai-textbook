@@ -118,7 +118,7 @@ export function useChat() {
       selectedText?: string,
       pageContext?: string,
     ): Promise<void> => {
-      if (!user || !content.trim()) return;
+      if (!content.trim()) return;
 
       // Cancel any ongoing stream
       if (abortControllerRef.current) {
