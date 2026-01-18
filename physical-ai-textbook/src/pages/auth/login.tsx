@@ -1,5 +1,6 @@
 import React, { useState, FormEvent } from "react";
 import { useHistory, useLocation } from "@docusaurus/router";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 import Translate, { translate } from "@docusaurus/Translate";
 import { useAuth } from "../../contexts/AuthContext";
 import styles from "../../components/AuthForms/styles.module.css";
@@ -83,7 +84,9 @@ export default function LoginPage(): React.ReactElement {
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
             />
           </svg>
-          <Translate id="auth.login.googleButton">Continue with Google</Translate>
+          <Translate id="auth.login.googleButton">
+            Continue with Google
+          </Translate>
         </button>
 
         <div className={styles.divider}>
@@ -131,12 +134,21 @@ export default function LoginPage(): React.ReactElement {
               required
               disabled={isLoading}
             />
-            <a href="/auth/reset-password" className={`${styles.link} ${styles.forgotPassword}`}>
-              <Translate id="auth.login.forgotPassword">Forgot password?</Translate>
+            <a
+              href={useBaseUrl("/auth/reset-password")}
+              className={`${styles.link} ${styles.forgotPassword}`}
+            >
+              <Translate id="auth.login.forgotPassword">
+                Forgot password?
+              </Translate>
             </a>
           </div>
 
-          <button type="submit" className={styles.submitButton} disabled={isLoading}>
+          <button
+            type="submit"
+            className={styles.submitButton}
+            disabled={isLoading}
+          >
             {isLoading ? (
               <span className={styles.spinner}></span>
             ) : (
@@ -147,8 +159,10 @@ export default function LoginPage(): React.ReactElement {
 
         <div className={styles.links}>
           <span>
-            <Translate id="auth.login.noAccount">Don't have an account?</Translate>{" "}
-            <a href="/auth/signup" className={styles.link}>
+            <Translate id="auth.login.noAccount">
+              Don't have an account?
+            </Translate>{" "}
+            <a href={useBaseUrl("/auth/signup")} className={styles.link}>
               <Translate id="auth.login.signUpLink">Sign up</Translate>
             </a>
           </span>

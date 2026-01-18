@@ -1,4 +1,5 @@
 import React, { useState, FormEvent } from "react";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 import Translate, { translate } from "@docusaurus/Translate";
 import { useAuth } from "../../contexts/AuthContext";
 import styles from "../../components/AuthForms/styles.module.css";
@@ -75,13 +76,15 @@ export default function ResetPasswordPage(): React.ReactElement {
             {isLoading ? (
               <span className={styles.spinner}></span>
             ) : (
-              <Translate id="auth.reset.submitButton">Send Reset Link</Translate>
+              <Translate id="auth.reset.submitButton">
+                Send Reset Link
+              </Translate>
             )}
           </button>
         </form>
 
         <div className={styles.links}>
-          <a href="/auth/login" className={styles.link}>
+          <a href={useBaseUrl("/auth/login")} className={styles.link}>
             <Translate id="auth.reset.backToLogin">Back to Sign In</Translate>
           </a>
         </div>
