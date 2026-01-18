@@ -12,9 +12,10 @@ export default function SignupPage(): React.ReactElement {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const { signUpWithEmail, signInWithGoogle, error, clearError } = useAuth();
+  const { signUpWithEmail, error, clearError } = useAuth();
   const history = useHistory();
   const loginUrl = useBaseUrl("/auth/login");
+  const homeUrl = useBaseUrl("/");
 
   const handleSignUp = async (e: FormEvent) => {
     e.preventDefault();
@@ -36,21 +37,7 @@ export default function SignupPage(): React.ReactElement {
 
     try {
       await signUpWithEmail(email, password, displayName);
-      history.push("/");
-    } catch (err) {
-      // Error is handled by AuthContext
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    clearError();
-
-    try {
-      await signInWithGoogle();
-      history.push("/");
+      history.push(homeUrl);
     } catch (err) {
       // Error is handled by AuthContext
     } finally {

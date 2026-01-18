@@ -9,15 +9,16 @@ export default function LoginPage(): React.ReactElement {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { signInWithEmail, signInWithGoogle, error, clearError } = useAuth();
+  const { signInWithEmail, error, clearError } = useAuth();
   const history = useHistory();
   const location = useLocation();
   const resetPasswordUrl = useBaseUrl("/auth/reset-password");
   const signupUrl = useBaseUrl("/auth/signup");
+  const homeUrl = useBaseUrl("/");
 
   // Get return URL from query params
   const searchParams = new URLSearchParams(location.search);
-  const returnUrl = searchParams.get("returnUrl") || "/";
+  const returnUrl = searchParams.get("returnUrl") || homeUrl;
 
   const handleEmailSignIn = async (e: FormEvent) => {
     e.preventDefault();
@@ -26,20 +27,6 @@ export default function LoginPage(): React.ReactElement {
 
     try {
       await signInWithEmail(email, password);
-      history.push(returnUrl);
-    } catch (err) {
-      // Error is handled by AuthContext
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    clearError();
-
-    try {
-      await signInWithGoogle();
       history.push(returnUrl);
     } catch (err) {
       // Error is handled by AuthContext
