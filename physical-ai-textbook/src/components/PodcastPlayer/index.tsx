@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useLocation } from "@docusaurus/router";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 import styles from "./styles.module.css";
 
 interface PodcastPlayerProps {
@@ -41,8 +42,12 @@ export default function PodcastPlayer({
 
   // Detect locale from URL path
   const location = useLocation();
-  const isUrdu = location.pathname.startsWith("/ur/") || location.pathname.includes("/ur/");
+  const isUrdu =
+    location.pathname.startsWith("/ur/") || location.pathname.includes("/ur/");
   const targetLang = isUrdu ? "ur" : "en";
+
+  // Resolve audio URL with baseUrl
+  const resolvedAudioUrl = useBaseUrl(audioUrl || "");
 
   // Keep isPlayingRef in sync with isPlaying state
   useEffect(() => {
@@ -145,7 +150,9 @@ export default function PodcastPlayer({
             }
             currentChunk = trimmedPart;
           } else {
-            currentChunk = currentChunk ? currentChunk + " " + trimmedPart : trimmedPart;
+            currentChunk = currentChunk
+              ? currentChunk + " " + trimmedPart
+              : trimmedPart;
           }
         });
 
@@ -184,7 +191,7 @@ export default function PodcastPlayer({
         if (currentChunk) chunks.push(currentChunk.trim());
       }
 
-      textChunksRef.current = chunks.filter(c => c.length > 0);
+      textChunksRef.current = chunks.filter((c) => c.length > 0);
     }
   }, [transcript, isUrdu]);
 
@@ -398,29 +405,36 @@ export default function PodcastPlayer({
   const canPlay = (useTTS && ttsSupported && transcript) || hasAudio;
 
   // Localized labels
-  const labels = isUrdu ? {
-    ttsMode: "🔊 ٹیکسٹ ٹو اسپیچ موڈ",
-    restart: "دوبارہ شروع کریں",
-    play: "چلائیں",
-    pause: "روکیں",
-    speed: "رفتار:",
-    showNotes: "شو نوٹس",
-    noAudio: "آڈیو دستیاب نہیں۔ آپ کا براؤزر ٹیکسٹ ٹو اسپیچ کو سپورٹ نہیں کرتا۔",
-    noTranscript: "ٹرانسکرپٹ دستیاب نہیں۔ براہ کرم نیچے ٹرانسکرپٹ پڑھیں۔",
-  } : {
-    ttsMode: "🔊 Text-to-Speech Mode",
-    restart: "Restart",
-    play: "Play",
-    pause: "Pause",
-    speed: "Speed:",
-    showNotes: "Show Notes",
-    noAudio: "Audio not available. Your browser doesn't support Text-to-Speech.",
-    noTranscript: "No transcript available. Please read the transcript below.",
-  };
+  const labels = isUrdu
+    ? {
+        ttsMode: "🔊 ٹیکسٹ ٹو اسپیچ موڈ",
+        restart: "دوبارہ شروع کریں",
+        play: "چلائیں",
+        pause: "روکیں",
+        speed: "رفتار:",
+        showNotes: "شو نوٹس",
+        noAudio:
+          "آڈیو دستیاب نہیں۔ آپ کا براؤزر ٹیکسٹ ٹو اسپیچ کو سپورٹ نہیں کرتا۔",
+        noTranscript: "ٹرانسکرپٹ دستیاب نہیں۔ براہ کرم نیچے ٹرانسکرپٹ پڑھیں۔",
+      }
+    : {
+        ttsMode: "🔊 Text-to-Speech Mode",
+        restart: "Restart",
+        play: "Play",
+        pause: "Pause",
+        speed: "Speed:",
+        showNotes: "Show Notes",
+        noAudio:
+          "Audio not available. Your browser doesn't support Text-to-Speech.",
+        noTranscript:
+          "No transcript available. Please read the transcript below.",
+      };
 
   return (
     <div className={styles.podcastPlayer}>
-      {audioUrl && <audio ref={audioRef} src={audioUrl} preload="metadata" />}
+      {audioUrl && (
+        <audio ref={audioRef} src={resolvedAudioUrl} preload="metadata" />
+      )}
 
       <div className={styles.header}>
         <div className={styles.episodeBadge}>{episodeNumber}</div>
