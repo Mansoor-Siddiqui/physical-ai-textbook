@@ -2,25 +2,15 @@ import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getAuth, Auth } from "firebase/auth";
 import { getFirestore, Firestore } from "firebase/firestore";
 
-// Get Firebase config from Docusaurus customFields
-const getFirebaseConfig = () => {
-  if (typeof window !== "undefined") {
-    // Access Docusaurus site config on client side
-    const siteConfig = (window as any).__DOCUSAURUS__;
-    if (siteConfig?.siteConfig?.customFields?.firebase) {
-      return siteConfig.siteConfig.customFields.firebase;
-    }
-  }
-
-  // Fallback config (will be replaced with real values in production)
-  return {
-    apiKey: "AIzaSyDemo-placeholder-key",
-    authDomain: "demo-project.firebaseapp.com",
-    projectId: "demo-project",
-    storageBucket: "demo-project.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef",
-  };
+// Firebase configuration - hardcoded for client-side use
+// These are public Firebase config values (safe to expose)
+const firebaseConfig = {
+  apiKey: "AIzaSyBJ9SFgWa_PwAMsljzI0IGPsXfCuKV2OD0",
+  authDomain: "physical-ai-textbook-d5909.firebaseapp.com",
+  projectId: "physical-ai-textbook-d5909",
+  storageBucket: "physical-ai-textbook-d5909.firebasestorage.app",
+  messagingSenderId: "26476153084",
+  appId: "1:26476153084:web:e1f96cc5809c2b27ceaf79",
 };
 
 // Initialize Firebase only on client side and only once
@@ -30,8 +20,6 @@ let db: Firestore | undefined;
 
 export const initializeFirebase = () => {
   if (typeof window !== "undefined" && !app) {
-    const firebaseConfig = getFirebaseConfig();
-
     if (!getApps().length) {
       app = initializeApp(firebaseConfig);
     } else {
