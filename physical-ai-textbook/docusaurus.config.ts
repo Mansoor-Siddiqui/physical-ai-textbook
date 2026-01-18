@@ -251,7 +251,7 @@ const config: Config = {
     announcementBar: {
       id: "support_us",
       content:
-        '🤖 New: <a target="_blank" rel="noopener noreferrer" href="/podcast">Listen to our Physical AI Podcast</a> - Audio versions of all chapters!',
+        '🤖 New: <a rel="noopener noreferrer" href="podcast">Listen to our Physical AI Podcast</a> - Audio versions of all chapters!',
       backgroundColor: "#1a1a2e",
       textColor: "#e94560",
       isCloseable: true,
